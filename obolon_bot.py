@@ -150,13 +150,13 @@ def fetch_data(session):
                     f"Опис: {trip.get('logist_descr') or '—'}\n"
                     f"Старт: {trip.get('date_start')}\n"
                     f"Ціна: {trip.get('cur_price')*1.2} грн (з ПДВ)\n\n"
-                    f"⏳ Через 2 секунди заявка буде взята автоматично..."
+                    # f"⏳ Через 2 секунди заявка буде взята автоматично..."
                 )
                 send_telegram_message(message)
-                print(f"🕒 Очікуємо 2 секунди перед взяттям {trip_id}...")
-                time.sleep(2)
+                #print(f"🕒 Очікуємо 2 секунди перед взяттям {trip_id}...")
+                #time.sleep(2)
 
-                take_trip(session, trip)
+                # take_trip(session, trip)
                 sent_ids.add(trip_id)
 
         return session
