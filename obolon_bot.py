@@ -144,7 +144,7 @@ def fetch_data(session):
                     total_distance = trip.get("fk_trips", {}).get("total_distance", 0) or 0
                     cur_price = trip.get("cur_price", 0) or 0
                     pdv_price = cur_price * 1.2
-                    calc_price = total_distance * 2.5 * 22
+                    calc_price = total_distance * 2.35 * 22
 
                     begin_name = trip.get("fk_trips", {}).get("fk_begin_addr", {}).get("f_name", "—")
                     end_city = trip.get("fk_trips", {}).get("end_addr_name", "—")
