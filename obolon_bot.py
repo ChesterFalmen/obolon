@@ -185,7 +185,7 @@ def fetch_data(session):
 # === Головний цикл ===
 if __name__ == "__main__":
     session = login()
-    print("Останнє оновлення 02.04 12:11")
+    print("Останнє оновлення 02.04 12:12")
     while True:
         if session:
             result = fetch_data(session)
