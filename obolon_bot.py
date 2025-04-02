@@ -64,7 +64,7 @@ def check_for_status_command():
             if text.strip().lower() == "/статус":
                 reply = (
                     "✅ Бот активний\n"
-                    f"🕒 Останнє оновлення: {last_update_time or '—'}\n"
+                    f"🕒 Останнє оновлення: 02.04.12:00\n"
                     f"📦 Поточна кількість рейсів: {last_trip_count}"
                 )
                 send_telegram_message(reply, chat_id=chat_id, reply_to_message_id=message_id)
