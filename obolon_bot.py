@@ -123,7 +123,7 @@ def fetch_data(session):
 
         response.raise_for_status()
         trips = response.json().get("rows", [])
-        print(f"Знайдено рейсів: {len(trips)}")
+        #print(f"Знайдено рейсів: {len(trips)}")
 
         last_update_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         last_trip_count = len(trips)
