@@ -123,7 +123,7 @@ def fetch_data(session):
 
         response.raise_for_status()
         trips = response.json().get("rows", [])
-        # print(f"Знайдено рейсів: {len(trips)}")
+        print(f"Знайдено рейсів: {len(trips)}")
 
         last_update_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         last_trip_count = len(trips)
@@ -132,8 +132,6 @@ def fetch_data(session):
             descr = (trip.get("logist_descr") or "").lower()
             trip_id = trip.get("f_code_trip")
             begin_code = trip.get("fk_trips", {}).get("fk_begin_addr", {}).get("f_code_id")
-            begin_name = trip.get("fk_trips", {}).get("fk_begin_addr", {}).get("f_name", "—")
-            end_city = trip.get("fk_trips", {}).get("end_addr_name", "—")
 
             if trip_id in sent_ids:
                 continue
@@ -142,27 +140,47 @@ def fetch_data(session):
                 continue
 
             if any(keyword in descr for keyword in ["дробина", "ячмінь"]):
-                message = (
-                    f"🚛 *Новий рейс знайдено!*\n"
-                    f"ID: {trip_id}\n"
-                    f"Звідки: {begin_name}\n"
-                    f"Куди: {end_city}\n"
-                    f"Опис: {trip.get('logist_descr') or '—'}\n"
-                    f"Старт: {trip.get('date_start')}\n"
-                    f"Ціна: {trip.get('cur_price')*1.2} грн (з ПДВ)\n\n"
-                    # f"⏳ Через 2 секунди заявка буде взята автоматично..."
-                )
-                send_telegram_message(message)
-                #print(f"🕒 Очікуємо 2 секунди перед взяттям {trip_id}...")
-                #time.sleep(2)
+                try:
+                    total_distance = trip.get("fk_trips", {}).get("total_distance", 0) or 0
+                    cur_price = trip.get("cur_price", 0) or 0
+                    pdv_price = cur_price * 1.2
+                    calc_price = total_distance * 2.5 * 22
 
-                # take_trip(session, trip)
-                sent_ids.add(trip_id)
+                    begin_name = trip.get("fk_trips", {}).get("fk_begin_addr", {}).get("f_name", "—")
+                    end_city = trip.get("fk_trips", {}).get("end_addr_name", "—")
+
+                    message = (
+                        f"🚛 *Новий рейс знайдено!*\n"
+                        f"ID: {trip_id}\n"
+                        f"Звідки: {begin_name}\n"
+                        f"Куди: {end_city}\n"
+                        f"Опис: {trip.get('logist_descr') or '—'}\n"
+                        f"Відстань: {total_distance} км\n"
+                        f"📦 Ціна з ПДВ: {round(pdv_price)} грн\n"
+                        f"📐 Розрахована ціна: {round(calc_price)} грн\n"
+                    )
+
+                    if calc_price <= pdv_price:
+                        message += "✅ Ціна по формулі <= за ПДВ — заявка буде взята через 2 секунди"
+                        send_telegram_message(message)
+                        print(f"🕒 Очікуємо 2 секунди перед взяттям {trip_id}...")
+                        time.sleep(2)
+                        take_trip(session, trip)
+                    else:
+                        message += "ℹ️ Ціна по формулі нижча — заявку не беремо автоматично"
+                        send_telegram_message(message)
+
+                    sent_ids.add(trip_id)
+
+                except Exception as e:
+                    print(f"⚠️ Помилка при обробці рейсу {trip_id}:", e)
 
         return session
+
     except requests.exceptions.RequestException as e:
         print("❌ Error fetching data:", e)
         return session
+
 
 # === Головний цикл ===
 if __name__ == "__main__":
