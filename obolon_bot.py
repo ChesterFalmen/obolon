@@ -64,7 +64,7 @@ def check_for_status_command():
             if text.strip().lower() == "/статус":
                 reply = (
                     "✅ Бот активний\n"
-                    f"🕒 Останнє оновлення: 02.04.12:04\n"
+                    f"🕒 Останнє оновлення: 02.04.12:10\n"
                     f"📦 Поточна кількість рейсів: {last_trip_count}"
                 )
                 send_telegram_message(reply, chat_id=chat_id, reply_to_message_id=message_id)
@@ -185,7 +185,7 @@ def fetch_data(session):
 # === Головний цикл ===
 if __name__ == "__main__":
     session = login()
-    print("Останнє оновлення 02.04 12:04")
+    print("Останнє оновлення 02.04 12:10")
     while True:
         if session:
             result = fetch_data(session)
