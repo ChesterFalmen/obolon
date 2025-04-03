@@ -64,7 +64,7 @@ def check_for_status_command():
             if text.strip().lower() == "/status":
                 reply = (
                     "✅ Бот активний\n"
-                    f"🕒 Останнє оновлення: 03.04 11:25\n"
+                    f"🕒 Останнє оновлення: 03.04 11:55\n"
                     f"📦 Поточна кількість рейсів: {last_trip_count}"
                 )
                 send_telegram_message(reply, chat_id=chat_id, reply_to_message_id=message_id)
@@ -139,7 +139,7 @@ def fetch_data(session):
             if begin_code not in ALLOWED_CODE_IDS:
                 continue
 
-            if any(keyword in descr for keyword in ["дробина", "ячмінь", "жито", "зерновоз"]):
+            if any(keyword in descr for keyword in ["дробина", "ячмінь", "зерновоз"]):
                 try:
                     total_distance = trip.get("fk_trips", {}).get("total_distance", 0) or 0
                     cur_price = trip.get("cur_price", 0) or 0
@@ -185,7 +185,7 @@ def fetch_data(session):
 # === Головний цикл ===
 if __name__ == "__main__":
     session = login()
-    print("Останнє оновлення 03.04 11:25")
+    print("Останнє оновлення 03.04 11:55")
     while True:
         if session:
             result = fetch_data(session)
