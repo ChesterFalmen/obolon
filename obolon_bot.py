@@ -193,7 +193,7 @@ if __name__ == "__main__":
                 time.sleep(2)
                 session = login()
         else:
-            print("⏳ Очікуємо, поки логін спрацює...")
+            print("⏳ Очікуємо, поки логін спрацює..")
             time.sleep(5)
 
         check_for_status_command()
