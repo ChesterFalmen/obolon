@@ -139,7 +139,7 @@ def fetch_data(session):
             if begin_code not in ALLOWED_CODE_IDS:
                 continue
 
-            if any(keyword in descr for keyword in ["дробина", "ячмінь"]):
+            if any(keyword in descr for keyword in ["дробина", "ячмінь", "жито"]):
                 try:
                     total_distance = trip.get("fk_trips", {}).get("total_distance", 0) or 0
                     cur_price = trip.get("cur_price", 0) or 0
@@ -163,8 +163,8 @@ def fetch_data(session):
                     if calc_price <= pdv_price:
                         message += "✅ Ціна по формулі <= за ПДВ — заявка буде взята через 2 секунди"
                         send_telegram_message(message)
-                        print(f"🕒 Очікуємо 2 секунди перед взяттям {trip_id}...")
-                        time.sleep(2)
+                        print(f"🕒 Очікуємо 4 секунди перед взяттям {trip_id}...")
+                        time.sleep(4)
                         take_trip(session, trip)
                     else:
                         message += "ℹ️ Ціна по формулі нижча — заявку не беремо автоматично"
