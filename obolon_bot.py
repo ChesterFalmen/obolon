@@ -139,7 +139,7 @@ def fetch_data(session):
             if begin_code not in ALLOWED_CODE_IDS:
                 continue
 
-            if any(keyword in descr for keyword in ["дробина", "ячмінь", "жито"]):
+            if any(keyword in descr for keyword in ["дробина", "ячмінь", "жито", "зерновоз"]):
                 try:
                     total_distance = trip.get("fk_trips", {}).get("total_distance", 0) or 0
                     cur_price = trip.get("cur_price", 0) or 0
