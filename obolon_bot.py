@@ -18,7 +18,7 @@ LOGIN_PAYLOAD = {
     "password": "Akro909##"
 }
 
-# === Дозволені адреси за f_code_id ===
+# === Дозволені адреси за f_code_id ==
 ALLOWED_CODE_IDS = [8092, 1059, 23178]
 
 # === API URL ===
