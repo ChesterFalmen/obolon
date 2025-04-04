@@ -215,7 +215,7 @@ def telegram_listener():
                 elif text == "/monitoring":
                     handle_monitoring_command(chat_id)
         except Exception as e:
-            print("❌ Telegram error:", e)
+            print("❌ Telegram errror:", e)
         time.sleep(3)
 
 # === MAIN ===
