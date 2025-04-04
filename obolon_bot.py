@@ -39,7 +39,9 @@ def send_telegram_message(text):
                 "parse_mode": "Markdown"
             })
         except Exception as e:
-            print(f"❌ Telegram Error для {chat_id}:", e)
+            now = datetime.now()
+            formatted_time = now.strftime("%Y-%m-%d %H:%M:%S")
+            print(f"{formatted_time} | ❌ Telegram Error для {chat_id}:", e)
 
 def login():
     session = requests.Session()
@@ -48,7 +50,9 @@ def login():
         print("🔐 Успішно авторизовано")
         return session
     except Exception as e:
-        print("❌ Помилка логіну:", e)
+        now = datetime.now()
+        formatted_time = now.strftime("%Y-%m-%d %H:%M:%S")
+        print(formatted_time, " | ❌ Помилка логіну:", e)
         return None
 
 def take_trip(session, trip):
@@ -68,12 +72,15 @@ def take_trip(session, trip):
     }
 
     url = f"https://tms.obolon.ua/api/auction/trips/update/{trip_id}"
+    now = datetime.now()
+    formatted_time = now.strftime("%Y-%m-%d %H:%M:%S")
     try:
         response = session.post(url, json=payload, verify=False)
         if response.status_code == 200:
-            print(f"✅ Заявку {trip_id} успішно взято!")
+            print(f"{formatted_time} | ✅ Заявку {trip_id} успішно взято!")
             send_telegram_message(f"✅ Заявка {trip_id} успішно взята!")
             monitored_ids.pop(trip_id, None)
+            time.sleep(4)
         else:
             send_telegram_message(f"❌ Помилка взяття заявки {trip_id}: {response.status_code}")
     except Exception as e:
@@ -90,7 +97,7 @@ def handle_monitoring_command():
     msg = f"🕵 У моніторингу {len(monitored_ids)} заявок:\n"
     for tid, data in monitored_ids.items():
         msg += (
-            f"• ID: {tid} | {data['distance']} км\n"
+            f"• ID: {tid} | {data['trip']} км\n"
             f"Поточна ціна з ПДВ: {round(data['pdv_price'])} грн\n"
             f"Очікувана: {round(data['calc_price'])} грн\n\n"
         )
@@ -151,7 +158,9 @@ def fetch_data(session):
 
         return session
     except Exception as e:
-        print("❌ Error fetching:", e)
+        now = datetime.now()
+        formatted_time = now.strftime("%Y-%m-%d %H:%M:%S")
+        print(formatted_time, " | ❌ Error fetching:", e)
         return session
 
 def telegram_listener():
@@ -165,12 +174,14 @@ def telegram_listener():
             for u in updates:
                 offset = u["update_id"] + 1
                 txt = u.get("message", {}).get("text", "")
-                if txt == "/статус":
+                if txt == "/status":
                     handle_status_command()
-                elif txt == "/моніторинг":
+                elif txt == "/monitoring":
                     handle_monitoring_command()
         except Exception as e:
-            print("❌ Telegram error:", e)
+            now = datetime.now()
+            formatted_time = now.strftime("%Y-%m-%d %H:%M:%S")
+            print(formatted_time, " | ❌ Telegram error:", e)
         time.sleep(3)
 
 # === MAIN ===
