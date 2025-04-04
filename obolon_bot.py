@@ -211,7 +211,7 @@ def telegram_listener():
                 chat_id = msg.get("chat", {}).get("id")
 
                 if text == "/status":
-                    handle_status_command()  # Можеш теж оновити, якщо хочеш персоналізувати
+                    handle_status_command(chat_id)  # Можеш теж оновити, якщо хочеш персоналізувати
                 elif text == "/monitoring":
                     handle_monitoring_command(chat_id)
         except Exception as e:
