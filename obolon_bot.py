@@ -86,11 +86,15 @@ def handle_monitoring_command():
     if not monitored_ids:
         send_telegram_message("📭 Моніторинг порожній.")
         return
+
     msg = f"🕵 У моніторингу {len(monitored_ids)} заявок:\n"
     for tid, data in monitored_ids.items():
-        msg += (f"• ID: {tid} | {data["distance"]} км\n"
-                f"Поточна ціна з ПДВ: {round(data["pdv_price"])} грн\n"
-                f"Очікувана: {round(data["calc_price"])} грн\n\n")
+        msg += (
+            f"• ID: {tid} | {data['distance']} км\n"
+            f"Поточна ціна з ПДВ: {round(data['pdv_price'])} грн\n"
+            f"Очікувана: {round(data['calc_price'])} грн\n\n"
+        )
+
     send_telegram_message(msg)
 
 def fetch_data(session):
@@ -165,8 +169,8 @@ def telegram_listener():
                     handle_status_command()
                 elif txt == "/моніторинг":
                     handle_monitoring_command()
-        except:
-            pass
+        except Exception as e:
+            print("❌ Telegram error:", e)
         time.sleep(3)
 
 # === MAIN ===
