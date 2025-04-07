@@ -159,7 +159,7 @@ def fetch_data(session):
             dist = trip.get("fk_trips", {}).get("total_distance", 0) or 0
             cur = trip.get("cur_price", 0) or 0
             pdv = cur * 1.2
-            calc = dist * 2.35 * 22
+            calc = dist * 2.4 * 22
 
             if trip_id not in monitored_ids:
                 send_telegram_message(
