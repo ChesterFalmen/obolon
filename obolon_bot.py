@@ -79,7 +79,7 @@ def take_trip(session, trip):
         response = session.post(url, json=payload, verify=False)
         if response.status_code == 200:
             print(f"{formatted_time} | ✅ Заявку {trip_id} успішно взято!")
-            send_telegram_message(f"✅ Заявка #{trip_id} успішно взята!")
+            send_telegram_message(f"✅ Заявка {trip_id} успішно взята!")
             monitored_ids.pop(trip_id, None)
             time.sleep(3)
         else:
@@ -134,6 +134,7 @@ def handle_monitoring_command(chat_id):
 
 def fetch_data(session):
     global last_update_time, last_trip_count
+    taken_ids = set()  # ID заявок, які ми самі взяли
 
     try:
         response = session.get(API_URL, verify=False)
@@ -145,8 +146,12 @@ def fetch_data(session):
         last_update_time = datetime.now().strftime("%d.%m.%Y %H:%M")
         last_trip_count = len(trips)
 
+        current_trip_ids = set()
+
         for trip in trips:
             trip_id = trip.get("f_code_trip")
+            current_trip_ids.add(trip_id)
+
             descr = (trip.get("logist_descr") or '').lower()
             begin = trip.get("fk_trips", {}).get("fk_begin_addr", {})
             begin_id = begin.get("f_code_id")
@@ -163,12 +168,12 @@ def fetch_data(session):
 
             if trip_id not in monitored_ids:
                 send_telegram_message(
-                    f"🚛 *Новий рейс додано у моніторинг!* "
+                    f"🚛 *Новий рейс додано у моніторинг!*\n"
                     f"ID: {trip_id}\n"
                     f"Звідки: {begin.get('f_name')}\n"
                     f"Куди: {trip.get('fk_trips', {}).get('end_addr_name')}\n"
                     f"Відстань: {dist} км\n"
-                    f"Коментар: {descr}\n"
+                    f"Коментар: {descr or '—'}\n"
                     f"Ціна з ПДВ: {round(pdv)} грн\n"
                     f"Очікувана мін. ціна: {round(calc)} грн"
                 )
@@ -183,18 +188,51 @@ def fetch_data(session):
             }
 
             if pdv >= calc:
-                send_telegram_message(f"✅ Ціна по ПДВ ({round(pdv)} грн) >= розрахованої ({round(calc)} грн)\n"
-                                      f"Беремо {trip_id} через 4 секунди")
-                monitored_ids.pop(trip_id, None)
-                time.sleep(4)
+                send_telegram_message(
+                    f"✅ Ціна з ПДВ ({round(pdv)} грн) >= розрахованої ({round(calc)} грн)\n"
+                    f"Беремо заявку {trip_id} через 3 секунди..."
+                )
+                time.sleep(3)
                 take_trip(session, trip)
+                taken_ids.add(trip_id)
+                monitored_ids.pop(trip_id, None)
+
+        # === 🔍 Очищаємо моніторинг від зниклих заявок (але не тих, що ми самі взяли) ===
+        to_remove = [tid for tid in monitored_ids if tid not in current_trip_ids and tid not in taken_ids]
+        for tid in to_remove:
+            data = monitored_ids.pop(tid)
+            dist = data.get("dist", 0) or 1
+            pdv = round(data.get("pdv_price", 0))
+            calc = round(data.get("calc_price", 0))
+            from_city = data.get("from", "—")
+            to_city = data.get("to", "—")
+
+            weight = data.get("trip", {}).get("fk_trips", {}).get("full_weight", 1) or 1
+            per_km = pdv / weight / dist if weight and dist else 0
+            per_ton = pdv / weight if weight else 0
+            per_km_total = pdv / dist if dist else 0
+
+            msg = (
+                f"❌ Заявка зникла з моніторингу, хтось забрав!\n"
+                f"• ID: {tid} | {dist} км\n\n"
+                f"🏁 Звідки: {from_city}\n"
+                f"🎯 Куди: {to_city}\n"
+                f"📦 Остання ціна з ПДВ: *{pdv}* грн\n"
+                f"📐 Очікувана: *{calc}* грн\n"
+                f"📊 Ціна за км/т: `{per_km:.2f}` грн/т/км\n"
+                f"⚖️ Ціна за тону: `{per_ton:.2f}` грн/т\n"
+                f"🛣️ Ціна за км: `{per_km_total:.2f}` грн/км"
+            )
+
+            send_telegram_message(msg)
 
         return session
+
     except Exception as e:
-        now = datetime.now()
-        formatted_time = now.strftime("%Y-%m-%d %H:%M:%S")
-        print(formatted_time, " | ❌ Error fetching:", e)
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        print(now, " | ❌ Error fetching:", e)
         return session
+
 
 def telegram_listener():
     offset = None
