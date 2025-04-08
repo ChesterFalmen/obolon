@@ -207,9 +207,10 @@ def fetch_data(session):
             from_city = data.get("from", "—")
             to_city = data.get("to", "—")
 
-            weight = data.get("trip", {}).get("fk_trips", {}).get("full_weight", 1) or 1
-            per_km = pdv / weight / dist if weight and dist else 0
-            per_ton = pdv / weight if weight else 0
+            # weight = data.get("trip", {}).get("fk_trips", {}).get("full_weight", 1) or 1
+
+            per_km = pdv / 22 / dist if dist else 0
+            per_ton = pdv / 22
             per_km_total = pdv / dist if dist else 0
 
             msg = (
