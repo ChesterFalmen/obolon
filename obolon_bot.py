@@ -56,7 +56,7 @@ def login():
         print(formatted_time, " | ❌ Помилка логіну:", e)
         return None
 
-def take_trip(session, trip):
+def take_trip(session, trip, id_trip):
     trip_id = trip["id"]
     cur_price = trip["cur_price"]
     fk_trip_id = trip["fk_trips"]["trip_id"]
@@ -78,14 +78,14 @@ def take_trip(session, trip):
     try:
         response = session.post(url, json=payload, verify=False)
         if response.status_code == 200:
-            print(f"{formatted_time} | ✅ Заявку {trip_id} успішно взято!")
-            send_telegram_message(f"✅ Заявка {trip_id} успішно взята!")
+            print(f"{formatted_time} | ✅ Заявку {id_trip} успішно взято!")
+            send_telegram_message(f"✅ Заявка {id_trip} успішно взята!")
             monitored_ids.pop(trip_id, None)
             time.sleep(3)
         else:
-            send_telegram_message(f"❌ Помилка взяття заявки {trip_id}: {response.status_code}")
+            send_telegram_message(f"❌ Помилка взяття заявки {id_trip}: {response.status_code}")
     except Exception as e:
-        send_telegram_message(f"❌ Виняток при взятті заявки {trip_id}: {e}")
+        send_telegram_message(f"❌ Виняток при взятті заявки {id_trip}: {e}")
 
 def handle_status_command(chat_id):
     send_telegram_message(f"📊 Статус бота\nОновлено: {last_update_time}\nРейсів: {last_trip_count}", chat_id)
@@ -164,7 +164,7 @@ def fetch_data(session):
             dist = trip.get("fk_trips", {}).get("total_distance", 0) or 0
             cur = trip.get("cur_price", 0) or 0
             pdv = cur * 1.2
-            calc = dist * 2.4 * 22
+            calc = dist * 2.5 * 22
 
             if trip_id not in monitored_ids:
                 send_telegram_message(
@@ -193,7 +193,7 @@ def fetch_data(session):
                     f"Беремо заявку {trip_id} через 3 секунди..."
                 )
                 time.sleep(3)
-                take_trip(session, trip)
+                take_trip(session, trip, trip_id)
                 taken_ids.add(trip_id)
                 monitored_ids.pop(trip_id, None)
 
